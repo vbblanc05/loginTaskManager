@@ -12,8 +12,10 @@ import androidx.compose.ui.Modifier
 
 @Composable
 fun HomeScreen(
-    irParaProdutos: () -> Unit
-){
+    irParaTarefas: () -> Unit,
+    irParaSprints: () -> Unit,
+    irParaUsuarios: () -> Unit
+) {
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -23,8 +25,14 @@ fun HomeScreen(
             text = "Home",
             style = MaterialTheme.typography.headlineLarge
         )
-        Button(onClick = irParaProdutos) {
-            Text("Ir para produtos")
+        Button(onClick = irParaTarefas) {
+            Text("Ir para tarefas")
+        }
+        Button(onClick = irParaSprints) {
+            Text("Ir para sprints")
+        }
+        Button(onClick = irParaUsuarios) {
+            Text("Gerenciar Usuarios")
         }
     }
 }

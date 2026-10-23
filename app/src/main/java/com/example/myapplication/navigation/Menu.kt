@@ -10,6 +10,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
+import com.example.myapplication.auth.SessaoUsuario
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -27,18 +28,19 @@ fun Menu(
                 Text("Home")
             }
             TextButton(onClick = {
-                navController.navigate(Produtos)
+                navController.navigate(Tarefas)
             }) {
-                Text("Produtos")
+                Text("Tarefas")
             }
             TextButton(onClick = {
-                navController.navigate(Categoria)
+                navController.navigate(Sprints)
             }) {
-                Text("Categoria")
+                Text("Sprints")
             }
 
             IconButton(
                 onClick = {
+                    SessaoUsuario.encerrar()
                     navController.navigate(Login){
                         popUpTo(0) { inclusive = true }
                     }

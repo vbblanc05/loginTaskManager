@@ -1,12 +1,12 @@
 package com.example.myapplication.ui.screens
 
-import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
@@ -19,30 +19,36 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import com.example.myapplication.auth.AuthManager
+import com.example.myapplication.ui.viewmodel.AuthViewModel
 
 @Composable
 fun LoginScreen(
     loginSucesso: () -> Unit,
-    irCadastro: () -> Unit
-    ){
+    irCadastro: () -> Unit,
+    authViewModel: AuthViewModel
+) {
     var email by remember { mutableStateOf("") }
     var senha by remember { mutableStateOf("") }
     var senhaVisivel by remember { mutableStateOf(false) }
-    val context = LocalContext.current
 
+    LaunchedEffect(authViewModel.concluido) {
+        if (authViewModel.concluido) {
+            authViewModel.consumirResultado()
+            loginSucesso()
+        }
+    }
     Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
+        modifier = Modifier.fillMaxSize().padding(16.dp).imePadding(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -52,7 +58,7 @@ fun LoginScreen(
 
         OutlinedTextField(
             value = email,
-            onValueChange = { email = it },
+            onValueChange = { if (it.length <= 254) email = it },
             label = { Text("E-mail") },
             modifier = Modifier.fillMaxWidth()
         )
@@ -61,7 +67,7 @@ fun LoginScreen(
 
         OutlinedTextField(
             value = senha,
-            onValueChange = { senha = it},
+            onValueChange = { if (it.length <= 128) senha = it },
             label = { Text("Senha") },
             visualTransformation = if (senhaVisivel) VisualTransformation.None
             else PasswordVisualTransformation(),
@@ -77,24 +83,26 @@ fun LoginScreen(
             },
             modifier = Modifier.fillMaxWidth()
         )
+        authViewModel.mensagem?.let {
+            Text(it, color = MaterialTheme.colorScheme.error)
+        }
+
+        if (authViewModel.carregando) Text("Aguarde...")
 
         Spacer(Modifier.height(16.dp))
 
-        Button(onClick = {
-            if (AuthManager.login(email, senha)){
-                loginSucesso()
-            }else{
-                Toast.makeText(context,
-                    "E-mail ou Senha Inválido!",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-        }, modifier = Modifier.fillMaxWidth()
+        Button(
+            onClick = {
+                authViewModel.login(email, senha)
+                senha = ""
+            },
+            enabled = !authViewModel.carregando,
+            modifier = Modifier.fillMaxWidth()
         ) {
             Text("Entrar")
         }
 
-        TextButton(onClick = irCadastro) {
+        TextButton(onClick = irCadastro, enabled = !authViewModel.carregando) {
             Text("Não tem conta? Cadastre-se")
         }
     }
